@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pagos Obra</title>
+<meta name="description" content="Registro de pagos de obra" />
+<meta name="theme-color" content="#1a1a18" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="apple-mobile-web-app-title" content="Pagos Obra" />
+<link rel="manifest" href="manifest.json" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    background: #f5f4f0;
+    color: #1a1a18;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #1a1a18;
+    color: #f5f4f0;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 { font-size: 18px; font-weight: 500; }
+  header span { font-size: 13px; color: #888; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 2rem; }
+  .stat { background: #fff; border-radius: 10px; padding: 1rem 1.25rem; border: 1px solid #e8e6e0; }
+  .stat label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
+  .stat .val { font-size: 22px; font-weight: 500; }
+
+  .card { background: #fff; border-radius: 12px; border: 1px solid #e8e6e0; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .card h2 { font-size: 14px; font-weight: 500; margin-bottom: 1rem; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+
+  label.field { font-size: 12px; color: #666; display: block; margin-bottom: 4px; }
+
+  input[type="text"], input[type="number"], input[type="date"], select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #d8d6d0;
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #faf9f7;
+    color: #1a1a18;
+    outline: none;
+    transition: border-color .15s;
+  }
+  input:focus, select:focus { border-color: #888; background: #fff; }
+
+  .radio-group { display: flex; gap: 16px; flex-wrap: wrap; }
+  .radio-group label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+
+  .btn {
+    display: inline-block; padding: 9px 18px; border-radius: 7px; font-size: 14px;
+    font-family: inherit; cursor: pointer; border: 1px solid #d8d6d0; background: #fff;
+    color: #1a1a18; transition: background .12s, transform .1s;
+  }
+  .btn:hover { background: #f0ede8; }
+  .btn:active { transform: scale(.98); }
+  .btn-primary { background: #1a1a18; color: #f5f4f0; border-color: #1a1a18; width: 100%; margin-top: 4px; }
+  .btn-primary:hover { background: #333; }
+  .btn-sm { font-size: 12px; padding: 3px 8px; }
+  .btn-danger { color: #a32d2d; border-color: #f0a0a0; }
+
+  .tabs { display: flex; border-bottom: 1px solid #e8e6e0; margin-bottom: 1.5rem; }
+  .tab { padding: 9px 18px; font-size: 14px; cursor: pointer; border: none; background: transparent;
+    font-family: inherit; color: #888; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: #1a1a18; font-weight: 500; border-bottom-color: #1a1a18; }
+
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  .filters input, .filters select { width: auto; flex: 1; min-width: 130px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 10px; color: #888; font-weight: 500; border-bottom: 1px solid #e8e6e0; }
+  td { padding: 9px 10px; border-bottom: 1px solid #f0ede8; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #faf9f7; }
+
+  .badge {
+    display: inline-block; font-size: 11px; padding: 2px 8px;
+    border-radius: 99px; white-space: nowrap;
+  }
+  .b-ars { background: #EAF3DE; color: #27500A; }
+  .b-usd { background: #E6F1FB; color: #0C447C; }
+  .b-eur { background: #EEEDFE; color: #3C3489; }
+  .b-brl { background: #FAEEDA; color: #633806; }
+  .b-uyu { background: #FBEAF0; color: #72243E; }
+  .b-pagado { background: #EAF3DE; color: #27500A; }
+  .b-pendiente { background: #FCEBEB; color: #791F1F; }
+  .b-parcial { background: #FAEEDA; color: #633806; }
+
+  .deuda-card { background: #fff; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid #e8e6e0; }
+  .deuda-card.con-deuda { border-color: #f0a0a0; }
+  .deuda-card.al-dia { border-color: #9FE1CB; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; background: #f0ede8; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 13px; flex-shrink: 0; }
+  .empty { padding: 2.5rem; text-align: center; color: #aaa; font-size: 14px; }
+
+  #info-cuota { font-size: 12px; color: #666; margin-bottom: 8px; }
+  #msg-error { font-size: 13px; color: #a32d2d; margin-bottom: 8px; display: none; }
+
+  @media (max-width: 640px) {
+    .stats { grid-template-columns: 1fr 1fr; }
+    .grid-4, .grid-3 { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Registro de Pagos — Obra</h1>
+    <span>Guardado localmente en este navegador</span>
+  </div>
+</header>
+
+<main>
+
+<div class="stats">
+  <div class="stat"><label>Total pagos</label><div class="val" id="stat-total">0</div></div>
+  <div class="stat"><label>Pagadores</label><div class="val" id="stat-pagadores">0</div></div>
+  <div class="stat"><label>En ARS</label><div class="val" id="stat-ars">$0</div></div>
+  <div class="stat"><label>En USD</label><div class="val" id="stat-usd">U$S 0</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="setTab('registro')">Pagos</button>
+  <button class="tab" onclick="setTab('deudas')">Estado de deuda</button>
+</div>
+
+<div id="panel-registro">
+  <div class="card">
+    <h2>Registrar pago</h2>
+
+    <div class="grid-2">
+      <div><label class="field">Fecha</label><input type="date" id="inp-fecha" /></div>
+      <div><label class="field">Pagador</label><input type="text" id="inp-pagador" placeholder="Nombre o empresa" list="lista-pagadores" /><datalist id="lista-pagadores"></datalist></div>
+    </div>
+
+    <div class="grid-4">
+      <div><label class="field">Moneda</label>
+        <select id="inp-moneda">
+          <option value="ARS">ARS — Pesos</option>
+          <option value="USD">USD — Dólares</option>
+          <option value="EUR">EUR — Euros</option>
+          <option value="BRL">BRL — Reales</option>
+          <option value="UYU">UYU — Pesos UY</option>
+        </select>
+      </div>
+      <div><label class="field">Importe total</label><input type="number" id="inp-importe" placeholder="0.00" min="0" step="0.01" oninput="recalcCuota()" /></div>
+      <div><label class="field">Método de pago</label>
+        <select id="inp-metodo" onchange="toggleCuotas()">
+          <option value="Efectivo">Efectivo</option>
+          <option value="Transferencia">Transferencia</option>
+          <option value="Cheque">Cheque</option>
+          <option value="Tarjeta débito">Tarjeta débito</option>
+          <option value="Tarjeta crédito">Tarjeta crédito</option>
+        </select>
+      </div>
+      <div id="wrap-cuotas" style="display:none;">
+        <label class="field">Cuotas</label>
+        <select id="inp-cuotas" onchange="recalcCuota()">
+          <option value="1">1 (contado)</option>
+          <option value="3">3 cuotas</option>
+          <option value="6">6 cuotas</option>
+          <option value="12">12 cuotas</option>
+          <option value="18">18 cuotas</option>
+          <option value="24">24 cuotas</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="info-cuota" style="display:none;"></div>
+
+    <div style="margin-bottom:10px;">
+      <label class="field">Concepto</label>
+      <input type="text" id="inp-concepto" placeholder="Mano de obra, materiales, etc." />
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label class="field" style="margin-bottom:8px;">Estado del pago</label>
+      <div class="radio-group">
+        <label><input type="radio" name="inp-estado" value="Pagado" checked /> Pagado</label>
+        <label><input type="radio" name="inp-estado" value="Pendiente" /> Pendiente / a deber</label>
+        <label><input type="radio" name="inp-estado" value="Parcial" /> Pago parcial</label>
+      </div>
+    </div>
+
+    <div id="wrap-pagado" style="display:none;margin-bottom:12px;">
+      <label class="field">Monto ya abonado</label>
+      <input type="number" id="inp-pagado" placeholder="0.00" min="0" step="0.01" style="width:200px;" />
+    </div>
+
+    <div id="msg-error"></div>
+    <button class="btn btn-primary" onclick="agregarPago()">Registrar pago</button>
+  </div>
+
+  <div class="filters">
+    <input type="text" id="filtro-pagador" placeholder="Buscar pagador..." oninput="renderTabla()" />
+    <select id="filtro-moneda" onchange="renderTabla()">
+      <option value="">Todas las monedas</option>
+      <option value="ARS">ARS</option>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="BRL">BRL</option>
+      <option value="UYU">UYU</option>
+    </select>
+    <select id="filtro-estado" onchange="renderTabla()">
+      <option value="">Todos los estados</option>
+      <option value="Pagado">Pagado</option>
+      <option value="Pendiente">Pendiente</option>
+      <option value="Parcial">Parcial</option>
+    </select>
+    <button class="btn" onclick="exportarCSV()">Exportar CSV</button>
+  </div>
+
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th><th>Pagador</th><th>Mon.</th><th style="text-align:right;">Total</th>
+          <th>Método</th><th>Concepto</th><th style="text-align:right;">Abonado</th>
+          <th style="text-align:right;">Deuda</th><th>Estado</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-pagos">
+        <tr><td colspan="10" class="empty">Aún no hay pagos registrados</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div id="panel-deudas" style="display:none;">
+  <p style="font-size:14px;font-weight:500;margin-bottom:1rem;">Cuánto debo a cada pagador</p>
+  <div id="lista-deudas"></div>
+</div>
+
+</main>
+
+<script>
+const SIMBOLO = { ARS:'$', USD:'U$S ', EUR:'€', BRL:'R$', UYU:'$U ' };
+const $ = id => document.getElementById(id);
+let pagos = [];
+let tabActual = 'registro';
+
+function fmt(n, mon) {
+  return (SIMBOLO[mon]||'') + parseFloat(n).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function save() { try { localStorage.setItem('pagos_obra_v2', JSON.stringify(pagos)); } catch(e) {} }
+function load() { try { const s = localStorage.getItem('pagos_obra_v2'); if(s) pagos = JSON.parse(s); } catch(e) {} }
+
+function setTab(t) {
+  tabActual = t;
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.tab[onclick="setTab('${t}')"]`).classList.add('active');
+  $('panel-registro').style.display = t==='registro' ? 'block' : 'none';
+  $('panel-deudas').style.display = t==='deudas' ? 'block' : 'none';
+  if(t==='deudas') renderDeudas();
+}
+
+function toggleCuotas() {
+  const m = $('inp-metodo').value;
+  $('wrap-cuotas').style.display = m==='Tarjeta crédito' ? 'block' : 'none';
+  recalcCuota();
+}
+
+function recalcCuota() {
+  const m = $('inp-metodo').value;
+  const tot = parseFloat($('inp-importe').value);
+  const c = parseInt($('inp-cuotas').value)||1;
+  const info = $('info-cuota');
+  if(m==='Tarjeta crédito' && c>1 && !isNaN(tot) && tot>0) {
+    info.textContent = c+' cuotas de '+fmt(tot/c,$('inp-moneda').value)+' c/u';
+    info.style.display='block';
+  } else { info.style.display='none'; }
+}
+
+document.querySelectorAll('input[name="inp-estado"]').forEach(r => {
+  r.addEventListener('change', () => {
+    $('wrap-pagado').style.display = r.value==='Parcial' ? 'block' : 'none';
+  });
+});
+
+function agregarPago() {
+  const fecha = $('inp-fecha').value;
+  const pagador = $('inp-pagador').value.trim();
+  const moneda = $('inp-moneda').value;
+  const importe = parseFloat($('inp-importe').value);
+  const concepto = $('inp-concepto').value.trim();
+  const metodo = $('inp-metodo').value;
+  const cuotas = metodo==='Tarjeta crédito' ? (parseInt($('inp-cuotas').value)||1) : 1;
+  const estado = document.querySelector('input[name="inp-estado"]:checked').value;
+  const abonado = estado==='Pagado' ? importe : estado==='Pendiente' ? 0 : (parseFloat($('inp-pagado').value)||0);
+  const err = $('msg-error');
+
+  if(!fecha || !pagador || isNaN(importe) || importe<=0) {
+    err.textContent='Completá fecha, pagador e importe válido.';
+    err.style.display='block'; return;
+  }
+  err.style.display='none';
+  pagos.unshift({id:Date.now(),fecha,pagador,moneda,importe,concepto,metodo,cuotas,estado,abonado});
+  save(); actualizarDatalist(); renderStats(); renderTabla();
+  $('inp-pagador').value=''; $('inp-importe').value=''; $('inp-concepto').value='';
+  $('inp-cuotas').value='1'; $('inp-metodo').value='Efectivo'; toggleCuotas();
+  $('inp-fecha').value=new Date().toISOString().slice(0,10);
+  document.querySelector('input[name="inp-estado"][value="Pagado"]').checked=true;
+  $('wrap-pagado').style.display='none';
+}
+
+function eliminar(id) {
+  if(!confirm('¿Eliminar este pago?')) return;
+  pagos=pagos.filter(p=>p.id!==id); save(); actualizarDatalist(); renderStats(); renderTabla();
+}
+
+function actualizarDatalist() {
+  $('lista-pagadores').innerHTML=[...new Set(pagos.map(p=>p.pagador))].map(n=>`<option value="${n}">`).join('');
+}
+
+function renderStats() {
+  const ars=pagos.filter(p=>p.moneda==='ARS').reduce((a,p)=>a+p.importe,0);
+  const usd=pagos.filter(p=>p.moneda==='USD').reduce((a,p)=>a+p.importe,0);
+  $('stat-total').textContent=pagos.length;
+  $('stat-pagadores').textContent=new Set(pagos.map(p=>p.pagador)).size;
+  $('stat-ars').textContent='$'+ars.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  $('stat-usd').textContent='U$S '+usd.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+const BMON={ARS:'b-ars',USD:'b-usd',EUR:'b-eur',BRL:'b-brl',UYU:'b-uyu'};
+const BEST={Pagado:'b-pagado',Pendiente:'b-pendiente',Parcial:'b-parcial'};
+
+function renderTabla() {
+  const fp=$('filtro-pagador').value.trim().toLowerCase();
+  const fm=$('filtro-moneda').value;
+  const fe=$('filtro-estado').value;
+  const tbody=$('tbody-pagos');
+  let fil=pagos.filter(p=>(!fp||p.pagador.toLowerCase().includes(fp))&&(!fm||p.moneda===fm)&&(!fe||p.estado===fe));
+  if(!fil.length){tbody.innerHTML='<tr><td colspan="10" class="empty">Sin resultados</td></tr>';return;}
+  tbody.innerHTML=fil.map(p=>{
+    const deuda=p.importe-p.abonado;
+    const cl=p.cuotas>1&&p.metodo==='Tarjeta crédito'?` ${p.cuotas}c`:'';
+    return `<tr>
+      <td>${p.fecha}</td>
+      <td style="font-weight:500;">${p.pagador}</td>
+      <td><span class="badge ${BMON[p.moneda]||''}">${p.moneda}</span></td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums;">${fmt(p.importe,p.moneda)}</td>
+      <td style="color:#666;">${p.metodo}${cl}</td>
+      <td style="color:#666;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.concepto||'—'}</td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums;color:#27500A;">${fmt(p.abonado,p.moneda)}</td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums;font-weight:500;color:${deuda>0.005?'#a32d2d':'#27500A'};">${fmt(deuda,p.moneda)}</td>
+      <td><span class="badge ${BEST[p.estado]||''}">${p.estado}</span></td>
+      <td><button class="btn btn-sm btn-danger" onclick="eliminar(${p.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderDeudas() {
+  const cont=$('lista-deudas');
+  const pagadores=[...new Set(pagos.map(p=>p.pagador))];
+  if(!pagadores.length){cont.innerHTML='<p class="empty">No hay pagadores registrados aún.</p>';return;}
+  cont.innerHTML=pagadores.map(nombre=>{
+    const ps=pagos.filter(p=>p.pagador===nombre);
+    const monedas=[...new Set(ps.map(p=>p.moneda))];
+    const resumen=monedas.map(mon=>{
+      const sub=ps.filter(p=>p.moneda===mon);
+      const total=sub.reduce((a,p)=>a+p.importe,0);
+      const abonado=sub.reduce((a,p)=>a+p.abonado,0);
+      const deuda=total-abonado;
+      return{mon,total,abonado,deuda};
+    });
+    const tieneDeuda=resumen.some(r=>r.deuda>0.005);
+    const cls=tieneDeuda?'con-deuda':'al-dia';
+    const badgeBg=tieneDeuda?'#FCEBEB':'#EAF3DE';
+    const badgeColor=tieneDeuda?'#791F1F':'#27500A';
+    const pendientes=ps.filter(p=>p.estado!=='Pagado');
+    return `<div class="deuda-card ${cls}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="avatar">${nombre.slice(0,2).toUpperCase()}</div>
+          <span style="font-weight:500;font-size:15px;">${nombre}</span>
+        </div>
+        <span class="badge" style="background:${badgeBg};color:${badgeColor};">${tieneDeuda?'Con deuda':'Al día'}</span>
+      </div>
+      <table style="margin-bottom:${pendientes.length?'12px':'0'};">
+        <thead><tr style="border-bottom:1px solid #e8e6e0;">
+          <th style="color:#888;font-weight:500;padding:4px 8px;">Moneda</th>
+          <th style="color:#888;font-weight:500;padding:4px 8px;text-align:right;">Total</th>
+          <th style="color:#888;font-weight:500;padding:4px 8px;text-align:right;">Abonado</th>
+          <th style="color:#888;font-weight:500;padding:4px 8px;text-align:right;">Debo</th>
+        </tr></thead>
+        <tbody>${resumen.map(r=>`<tr style="border-bottom:1px solid #f0ede8;">
+          <td style="padding:6px 8px;"><span class="badge ${BMON[r.mon]||''}">${r.mon}</span></td>
+          <td style="padding:6px 8px;text-align:right;">${fmt(r.total,r.mon)}</td>
+          <td style="padding:6px 8px;text-align:right;color:#27500A;">${fmt(r.abonado,r.mon)}</td>
+          <td style="padding:6px 8px;text-align:right;font-weight:500;color:${r.deuda>0.005?'#a32d2d':'#27500A'};">${fmt(r.deuda,r.mon)}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+      ${pendientes.length?`<div style="font-size:12px;color:#666;border-top:1px solid #f0ede8;padding-top:10px;">
+        <span style="font-weight:500;color:#1a1a18;">Pendientes:</span>
+        ${pendientes.map(p=>`<span style="margin-left:8px;background:#fff8f0;padding:2px 8px;border-radius:6px;display:inline-block;margin-top:4px;">${p.fecha} · ${fmt(p.importe-p.abonado,p.moneda)} · ${p.metodo}${p.cuotas>1?' ('+p.cuotas+'c)':''}</span>`).join('')}
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function exportarCSV() {
+  const headers=['Fecha','Pagador','Moneda','Importe total','Método','Cuotas','Concepto','Abonado','Estado','Deuda'];
+  const rows=pagos.map(p=>[p.fecha,p.pagador,p.moneda,p.importe.toFixed(2),p.metodo,p.cuotas,p.concepto,p.abonado.toFixed(2),p.estado,(p.importe-p.abonado).toFixed(2)]);
+  const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pagos_obra.csv';a.click();
+}
+
+load();
+$('inp-fecha').value=new Date().toISOString().slice(0,10);
+actualizarDatalist(); renderStats(); renderTabla();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "Registro de Pagos — Obra",
+  "short_name": "Pagos Obra",
+  "description": "Registrá los pagos de tu obra por pagador y moneda",
+  "start_url": "/evangeaz/pagos_obra.html",
+  "scope": "/evangeaz/",
+  "display": "standalone",
+  "background_color": "#f5f4f0",
+  "theme_color": "#1a1a18",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
